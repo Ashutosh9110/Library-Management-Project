@@ -8,7 +8,8 @@ const Book = sequelize.define('Book', {
   },
   authorName:{
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
+    defaultValue: 'Unknown Author'
   },
   issuedAt: {
     type: DataTypes.DATE,

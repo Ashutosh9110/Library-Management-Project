@@ -3,12 +3,12 @@ const { Book, ReturnedBook } = require('../models');
 const ONE_HOUR = 60 * 60 * 1000;
 
 exports.issueBook = async (req, res) => {
-  const { name } = req.body;
+  const { name, authorName } = req.body;
   const now = new Date();
 
   const book = await Book.create({
     name,
-    authorName: "Unknown Author", // You can assign based on name logic here
+    authorName: authorName || "Unknown Author", // default
     issuedAt: now,
     returnDue: new Date(now.getTime() + ONE_HOUR),
   });
@@ -35,8 +35,8 @@ exports.returnBook = async (req, res) => {
 
   const now = new Date();
   const fine = now > book.returnDue
-  ? Math.ceil((now - book.returnDue) / (1000 * 60 * 60 * 24)) * 100
-  : 0;
+    ? Math.ceil((now - book.returnDue) / (1000 * 60 * 60 * 24)) * 100
+    : 0;
 
   await ReturnedBook.create({
     originalBookId: book.id,

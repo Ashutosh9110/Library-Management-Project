@@ -19,94 +19,88 @@
   <button onclick="submitBook()">Submit</button>
 
   <div id="borrowedBooks"></div>
-  <!-- <button onclick="fetchBooks()">Get all books</button> -->
 
-  <h3>returned books</h3>
+  <h3>Returned Books</h3>
   <div id="returnedBooks"></div>
 
   <script>
     const API = 'http://localhost:3000/api';
-  
+
     async function fetchBooks() {
-  const res = await fetch(`${API}/books`);
-  const books = await res.json();
-  document.getElementById('borrowedBooks').innerHTML = '';
+      const res = await fetch(`${API}/books`);
+      const books = await res.json();
+      document.getElementById('borrowedBooks').innerHTML = '';
 
-  books.forEach(book => {
-    const now = new Date();
-    const due = new Date(book.returnDue);
-    const issued = new Date(book.issuedAt);
-    const fine = now > book.returnDue
-  ? Math.ceil((now - book.returnDue) / (1000 * 60 * 60 * 24)) * 100
-  : 0;
+      books.forEach(book => {
+        const now = new Date();
+        const due = new Date(book.returnDue);
+        const issued = new Date(book.issuedAt);
+        const fine = now > due ? Math.ceil((now - due) / (1000 * 60 * 60 * 24)) * 100 : 0;
 
-    const card = document.createElement('div');
-    card.className = 'book-card';
+        const card = document.createElement('div');
+        card.className = 'book-card';
 
-    card.innerHTML = `
-      <b>Book Name :</b> ${book.name}<br/>
-      <b>Author Name :</b> ${book.authorName}<br/>
-      <b>Book taken on :</b> ${issued.toLocaleString()}<br/>
-      <b>Book return date :</b> ${due.toLocaleString()}<br/>
-      <b>Current fine:</b> ${fine} rs<br/>
-      ${fine > 0 ? `
-        <input class="fineInput" value="${fine}" disabled />
-        <button class="payFine" onclick="returnBook(${book.id})">Pay Fine</button>
-      ` : `
-        <button class="return" onclick="returnBook(${book.id})">Return book</button>
-      `}
-    `;
+        card.innerHTML = `
+          <b>Book Name:</b> ${book.name}<br/>
+          <b>Author Name:</b> ${book.authorName}<br/>
+          <b>Book Taken On:</b> ${issued.toLocaleString()}<br/>
+          <b>Return Due Date:</b> ${due.toLocaleString()}<br/>
+          <b>Current Fine:</b> ${fine} rs<br/>
+          ${fine > 0 ? `
+            <input class="fineInput" value="${fine}" disabled />
+            <button class="payFine" onclick="returnBook(${book.id})">Pay Fine</button>
+          ` : `
+            <button class="return" onclick="returnBook(${book.id})">Return Book</button>
+          `}
+        `;
 
-    document.getElementById('borrowedBooks').appendChild(card);
-  });
-}
+        document.getElementById('borrowedBooks').appendChild(card);
+      });
+    }
 
-  
-async function fetchReturnedBooks() {
-  const res = await fetch(`${API}/returned`);
-  const books = await res.json();
-  const container = document.getElementById('returnedBooks');
-  container.innerHTML = '';
+    async function fetchReturnedBooks() {
+      const res = await fetch(`${API}/returned`);
+      const books = await res.json();
+      const container = document.getElementById('returnedBooks');
+      container.innerHTML = '';
 
-  books.forEach(book => {
-    const returned = new Date(book.returnedAt);
-    const card = document.createElement('div');
-    card.className = 'book-card';
+      books.forEach(book => {
+        const returned = new Date(book.returnedAt);
+        const card = document.createElement('div');
+        card.className = 'book-card';
 
-    card.innerHTML = `
-      <b>Book Name :</b> ${book.name}<br/>
-      <b>Author Name :</b> ${book.authorName}<br/>
-      <b>Original Book ID :</b> ${book.originalBookId}<br/>
-      <b>Book returned on :</b> ${returned.toLocaleString()}<br/>
-      <b>Fine :</b> ${book.fine} rs<br/>
-    `;
+        card.innerHTML = `
+          <b>Book Name:</b> ${book.name}<br/>
+          <b>Author Name:</b> ${book.authorName}<br/>
+          <b>Original Book ID:</b> ${book.originalBookId}<br/>
+          <b>Returned On:</b> ${returned.toLocaleString()}<br/>
+          <b>Fine Paid:</b> ${book.fine} rs<br/>
+        `;
 
-    container.appendChild(card);
-  });
-}
+        container.appendChild(card);
+      });
+    }
 
-  
     async function submitBook() {
-  const name = document.getElementById('bookName').value.trim();
-  if (!name ) return alert('Enter book name');
+      const name = document.getElementById('bookName').value.trim();
+      if (!name) return alert('Enter book name');
 
-  try {
-    const res = await fetch(`${API}/books`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name })
-    });
+      try {
+        const res = await fetch(`${API}/books`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name })
+        });
 
-    if (!res.ok) throw new Error('Failed to add book');
-    document.getElementById('bookName').value = '';
-    fetchBooks();
-  } catch (err) {
-    console.error(err);
-    alert('Error adding book.');
-  }
-}
+        if (!res.ok) throw new Error('Failed to add book');
+        document.getElementById('bookName').value = '';
+        fetchBooks();
+      } catch (err) {
+        console.error(err);
+        alert('Error adding book.');
+      }
+    }
 
-  
     async function returnBook(id) {
       await fetch(`${API}/return/${id}`, {
         method: 'POST'
@@ -114,9 +108,10 @@ async function fetchReturnedBooks() {
       fetchBooks();
       fetchReturnedBooks();
     }
-  
+
     // Initial load
     fetchBooks();
     fetchReturnedBooks();
   </script>
-  
+</body>
+</html>
